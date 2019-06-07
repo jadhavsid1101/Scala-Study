@@ -1,0 +1,88 @@
+//very usefull https://alvinalexander.com/scala/examples-scala-sequences-collection-methods-seq-list-array-buffer
+
+  var list = List.range(1, 11)
+
+  /* aggregate
+  aggregate function has 3 parts :
+    1.initial value of accumulators : tuple(0,0) here
+    2.seqop : It works like foldLeft with initial value of 0
+    3.combop : It combines the result generated through parallelization (this part was difficult for me to understand)
+
+  Refer : https://stackoverflow.com/questions/26761087/explanation-of-the-aggregate-scala-function
+   */
+  var result = list.par.aggregate((0, 0))(
+    (x, y) => (x._1 + y, x._2 + 1),
+    (x, y) => (x._1 + y._1, x._2 + y._2)
+  )
+
+  println(result) // (55,10)
+
+  /*
+  We can call list like a function
+  andThen allows us to compose one PartialFunction with another.
+  For example, perhaps I want to create a List where I can access its elements by index, and then multiply the element by 2.
+  This is essentially the same as using map on the list, except the computation is lazy.
+  Of course, you could accomplish the same thing with a view, but there might be some generic case where you'd want to treat the List as just a PartialFunction
+   */
+  var listNew = list.andThen(_ * 2)
+  println(listNew(1))
+
+  // apply
+  println(list.apply(1))
+  //applyOrElse partial function didn't got example
+  //list.applyOrElse(1,0=>0)
+  //Note : Read about partial functions link: https://alvinalexander.com/scala/how-to-define-use-partial-functions-in-scala-syntax-examples
+
+  // asInstanceOf
+  var listString: List[String] = list.asInstanceOf[List[String]]
+
+  //canEqual didn't find use for list
+
+  /*collect
+  The collect method takes a Partial Function as its parameter and applies it to all
+  the elements in the collection to create a new collection which satisfies the Partial Function.
+   */
+  list.collect({ case 1 => println("Found 1") })
+
+  /*collectFirst
+  Finds the first element of the traversable or iterator for which the given partial function is defined,
+  and applies the partial function to it
+   */
+  list.collectFirst { case x if x.equals(1) => println(x) }
+
+  var iterator = list.combinations(3)
+  iterator.foreach { x => println(x) } //"abbbc".combinations(2) = Iterator(ab, ac, bb, bc)
+
+  println(list.contains(1)) //true
+
+  //containsslice https://bradcollins.com/2015/03/28/scala-saturday-the-contains-and-containsslice-methods/
+  println(list.containsSlice(Seq(1, 2))) //true
+  println(list.containsSlice(Seq(2, 1))) //false
+
+  val array = Array(0, 0, 0, 0, 0, 0)
+  val array2 = Array(0, 0, 0, 0, 0, 0)
+  list.copyToArray(array)
+  list.copyToArray(array2, 3)
+  array.foreach { x => print(x) }
+  array2.foreach { x => print(x) }
+
+  var tenToTwenty = (10 to 20).toList
+  list.corresponds(tenToTwenty)((x, y) => {
+    println(x, y); x + 9 == y
+  })
+
+  println(list.count(_==1))
+
+  println(list.diff(List(1,10)))
+
+  println(list.distinct)
+
+  println(list.drop(2))
+
+  println(list.dropRight(2))
+
+  println(list.dropWhile(_<4))
+
+  println(list.endsWith(List(9)))
+
+  println(list.exists(_==4))
